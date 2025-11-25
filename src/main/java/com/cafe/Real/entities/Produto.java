@@ -11,17 +11,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "tb_produto", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"codigo"})
-})
+@Table(name = "tb_produto")
 public class Produto {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, unique = true)
-    private String codigo;
     
     @Column(nullable = false)
     private String descricao;
@@ -29,8 +24,14 @@ public class Produto {
     @Column(name = "preco_unitario", nullable = false)
     private Double precoUnitario;
     
-    @Column(name = "unidade_medida", nullable = false)
-    private String unidadeMedida;
+    @Column(name = "categoria")
+    private String categoria;
+    
+    @Column(name = "setor")
+    private String setor;
+    
+    @Column(name = "ativo")
+    private Boolean ativo = true;
     
     // Getters e Setters
     public Long getId() {
@@ -39,14 +40,6 @@ public class Produto {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
     }
 
     public String getDescricao() {
@@ -65,12 +58,28 @@ public class Produto {
         this.precoUnitario = precoUnitario;
     }
 
-    public String getUnidadeMedida() {
-        return unidadeMedida;
+    public String getCategoria() {
+        return categoria;
     }
 
-    public void setUnidadeMedida(String unidadeMedida) {
-        this.unidadeMedida = unidadeMedida;
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public String getSetor() {
+        return setor;
+    }
+
+    public void setSetor(String setor) {
+        this.setor = setor;
+    }
+    
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
     
     // Equals e HashCode

@@ -7,6 +7,6 @@ import com.cafe.Real.entities.Produto;
 
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
-    Optional<Produto> findByCodigo(String codigo);
-    boolean existsByCodigo(String codigo);
+    java.util.List<Produto> findByAtivoTrue();
+    Optional<Produto> findByIdAndAtivoTrue(Long id);
 }

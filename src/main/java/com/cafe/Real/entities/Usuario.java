@@ -9,17 +9,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_usuario")
 public class Usuario {
 
-	 public enum Role {
-	        ADMIN, OPERADOR, CONSULTA
-	    }
-	    
-	    @Id
+	@Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 	    
@@ -75,6 +72,13 @@ public class Usuario {
 
 	    public void setRole(Role role) {
 	        this.role = role;
+	    }
+	    
+	    @PrePersist
+	    public void prePersist() {
+	        if (this.role == null) {
+	            this.role = Role.USUARIO;
+	        }
 	    }
 	    
 	    // Equals e HashCode

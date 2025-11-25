@@ -1,10 +1,7 @@
 package com.cafe.Real.entities;
 
 public enum Role {
-
-	ADMIN("Administrador"),
-    OPERADOR("Operador de estoque"),
-    CONSULTA("Consulta apenas");
+    USUARIO("Usuário");
 
     private final String descricao;
 

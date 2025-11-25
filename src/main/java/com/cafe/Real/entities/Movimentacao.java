@@ -39,11 +39,15 @@ public class Movimentacao {
     @Column(name = "data_hora", nullable = false)
     private LocalDateTime dataHora;
     
-    @Column(name = "origem_deposito")
-    private String origemDeposito;
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
     
-    @Column(name = "destino_deposito")
-    private String destinoDeposito;
+    @Column(name = "setor_origem")
+    private String setorOrigem;
+    
+    @Column(name = "setor_destino")
+    private String setorDestino;
     
     // Getters e Setters
     public Long getId() {
@@ -86,19 +90,27 @@ public class Movimentacao {
         this.dataHora = dataHora;
     }
 
-    public String getOrigemDeposito() {
-        return origemDeposito;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setOrigemDeposito(String origemDeposito) {
-        this.origemDeposito = origemDeposito;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
-    public String getDestinoDeposito() {
-        return destinoDeposito;
+    public String getSetorOrigem() {
+        return setorOrigem;
     }
 
-    public void setDestinoDeposito(String destinoDeposito) {
-        this.destinoDeposito = destinoDeposito;
+    public void setSetorOrigem(String setorOrigem) {
+        this.setorOrigem = setorOrigem;
+    }
+
+    public String getSetorDestino() {
+        return setorDestino;
+    }
+
+    public void setSetorDestino(String setorDestino) {
+        this.setorDestino = setorDestino;
     }
 }

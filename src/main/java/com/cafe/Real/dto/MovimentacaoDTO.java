@@ -2,48 +2,59 @@ package com.cafe.Real.dto;
 
 import java.time.LocalDateTime;
 import com.cafe.Real.entities.Movimentacao;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MovimentacaoDTO {
 
 	 private Long id;
-	    private ProdutoDTO produto;
-	    private String tipo;
+	    private Long produtoId;
+	    private String produtoDescricao;
+	    private String tipoMovimentacao;
 	    private Integer quantidade;
-	    private LocalDateTime dataHora;
-	    private String origemDeposito;
-	    private String destinoDeposito;
+	    private String data;
+	    private String responsavel;
+	    private String setorOrigem;
+	    private String setorDestino;
 
 	    public MovimentacaoDTO() {}
 
 	    public MovimentacaoDTO(Movimentacao movimentacao) {
 	        this.id = movimentacao.getId();
-	        this.produto = new ProdutoDTO(movimentacao.getProduto());
-	        this.tipo = movimentacao.getTipo().name();
+	        this.produtoId = movimentacao.getProduto().getId();
+	        this.produtoDescricao = movimentacao.getProduto().getDescricao();
+	        this.tipoMovimentacao = movimentacao.getTipo().name();
 	        this.quantidade = movimentacao.getQuantidade();
-	        this.dataHora = movimentacao.getDataHora();
-	        this.origemDeposito = movimentacao.getOrigemDeposito();
-	        this.destinoDeposito = movimentacao.getDestinoDeposito();
+	        this.data = movimentacao.getDataHora().toLocalDate().toString();
+	        this.responsavel = movimentacao.getUsuario().getNome();
+	        this.setorOrigem = movimentacao.getSetorOrigem();
+	        this.setorDestino = movimentacao.getSetorDestino();
 	    }
 
 	    // Getters e Setters
 	    public Long getId() { return id; }
 	    public void setId(Long id) { this.id = id; }
 	    
-	    public ProdutoDTO getProduto() { return produto; }
-	    public void setProduto(ProdutoDTO produto) { this.produto = produto; }
+	    public Long getProdutoId() { return produtoId; }
+	    public void setProdutoId(Long produtoId) { this.produtoId = produtoId; }
 	    
-	    public String getTipo() { return tipo; }
-	    public void setTipo(String tipo) { this.tipo = tipo; }
+	    public String getProdutoDescricao() { return produtoDescricao; }
+	    public void setProdutoDescricao(String produtoDescricao) { this.produtoDescricao = produtoDescricao; }
+	    
+	    public String getTipoMovimentacao() { return tipoMovimentacao; }
+	    public void setTipoMovimentacao(String tipoMovimentacao) { this.tipoMovimentacao = tipoMovimentacao; }
 	    
 	    public Integer getQuantidade() { return quantidade; }
 	    public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
 	    
-	    public LocalDateTime getDataHora() { return dataHora; }
-	    public void setDataHora(LocalDateTime dataHora) { this.dataHora = dataHora; }
+	    public String getData() { return data; }
+	    public void setData(String data) { this.data = data; }
 	    
-	    public String getOrigemDeposito() { return origemDeposito; }
-	    public void setOrigemDeposito(String origemDeposito) { this.origemDeposito = origemDeposito; }
+	    public String getResponsavel() { return responsavel; }
+	    public void setResponsavel(String responsavel) { this.responsavel = responsavel; }
 	    
-	    public String getDestinoDeposito() { return destinoDeposito; }
-	    public void setDestinoDeposito(String destinoDeposito) { this.destinoDeposito = destinoDeposito; }
+	    public String getSetorOrigem() { return setorOrigem; }
+	    public void setSetorOrigem(String setorOrigem) { this.setorOrigem = setorOrigem; }
+	    
+	    public String getSetorDestino() { return setorDestino; }
+	    public void setSetorDestino(String setorDestino) { this.setorDestino = setorDestino; }
 }

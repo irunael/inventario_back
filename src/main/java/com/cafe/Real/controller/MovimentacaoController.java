@@ -27,16 +27,30 @@ public class MovimentacaoController {
     }
 
     @PostMapping
-    public ResponseEntity<MovimentacaoDTO> registrarMovimentacao(
+    public ResponseEntity<?> registrarMovimentacao(
             @RequestBody MovimentacaoCreateDTO movimentacaoCreateDTO) {
-        MovimentacaoDTO movimentacaoDTO = movimentacaoService.registrarMovimentacao(movimentacaoCreateDTO);
-        
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(movimentacaoDTO.getId())
-                .toUri();
-        
-        return ResponseEntity.created(location).body(movimentacaoDTO);
+        try {
+            MovimentacaoDTO movimentacaoDTO = movimentacaoService.registrarMovimentacao(movimentacaoCreateDTO);
+            
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(movimentacaoDTO.getId())
+                    .toUri();
+            
+            return ResponseEntity.created(location).body(movimentacaoDTO);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("não encontrado")) {
+                return ResponseEntity.status(404).body(java.util.Map.of("message", e.getMessage(), "status", 404));
+            }
+            if (e.getMessage().contains("Estoque insuficiente")) {
+                return ResponseEntity.status(400).body(java.util.Map.of("message", e.getMessage(), "status", 400));
+            }
+            e.printStackTrace();
+            return ResponseEntity.status(400).body(java.util.Map.of("message", e.getMessage(), "status", 400));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(java.util.Map.of("message", "Erro ao registrar movimentação: " + e.getMessage(), "status", 500));
+        }
     }
 
     @GetMapping

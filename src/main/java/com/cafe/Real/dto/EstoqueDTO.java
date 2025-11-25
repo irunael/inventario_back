@@ -8,7 +8,9 @@ public class EstoqueDTO {
 	private Long id;
     private ProdutoDTO produto;
     private Integer quantidadeAtual;
+    private Integer estoqueMinimo;
     private BigDecimal valorTotal;
+    private Boolean abaixoDoMinimo;
 
     public EstoqueDTO() {}
 
@@ -16,6 +18,7 @@ public class EstoqueDTO {
         this.id = estoque.getId();
         this.produto = new ProdutoDTO(estoque.getProduto());
         this.quantidadeAtual = estoque.getQuantidadeAtual();
+        this.estoqueMinimo = estoque.getEstoqueMinimo();
         this.valorTotal = estoque.getValorTotal();
     }
 
@@ -29,6 +32,12 @@ public class EstoqueDTO {
     public Integer getQuantidadeAtual() { return quantidadeAtual; }
     public void setQuantidadeAtual(Integer quantidadeAtual) { this.quantidadeAtual = quantidadeAtual; }
     
+    public Integer getEstoqueMinimo() { return estoqueMinimo; }
+    public void setEstoqueMinimo(Integer estoqueMinimo) { this.estoqueMinimo = estoqueMinimo; }
+    
     public BigDecimal getValorTotal() { return valorTotal; }
     public void setValorTotal(BigDecimal valorTotal) { this.valorTotal = valorTotal; }
+    
+    public Boolean getAbaixoDoMinimo() { return abaixoDoMinimo; }
+    public void setAbaixoDoMinimo(Boolean abaixoDoMinimo) { this.abaixoDoMinimo = abaixoDoMinimo; }
 }

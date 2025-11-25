@@ -29,7 +29,9 @@ public class EstoqueService {
     public EstoqueDTO consultarEstoquePorProduto(Long produtoId) {
         Estoque estoque = estoqueRepository.findByProdutoId(produtoId)
             .orElseThrow(() -> new RuntimeException("Estoque não encontrado para o produto"));
-        return new EstoqueDTO(estoque);
+        EstoqueDTO dto = new EstoqueDTO(estoque);
+        dto.setAbaixoDoMinimo(estoque.getQuantidadeAtual() < estoque.getEstoqueMinimo());
+        return dto;
     }
 
     public void atualizarEstoque(Long produtoId, Integer quantidadeMovimentacao, boolean isEntrada) {

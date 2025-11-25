@@ -27,33 +27,52 @@ public class ProdutoService {
 	    }
 
 	    public ProdutoDTO criarProduto(ProdutoCreateDTO produtoCreateDTO) {
-	        if (produtoRepository.existsByCodigo(produtoCreateDTO.getCodigo())) {
-	            throw new RuntimeException("Código do produto já existe");
-	        }
-
 	        Produto produto = new Produto();
-	        produto.setCodigo(produtoCreateDTO.getCodigo());
 	        produto.setDescricao(produtoCreateDTO.getDescricao());
 	        produto.setPrecoUnitario(produtoCreateDTO.getPrecoUnitario());
-	        produto.setUnidadeMedida(produtoCreateDTO.getUnidadeMedida());
+	        produto.setCategoria(produtoCreateDTO.getCategoria());
+	        produto.setSetor(produtoCreateDTO.getSetor());
 
 	        produto = produtoRepository.save(produto);
 
 	        // Criar registro de estoque inicial
+	        Integer quantidadeInicial = produtoCreateDTO.getQuantidadeInicial() != null ? 
+	            produtoCreateDTO.getQuantidadeInicial() : 0;
+	        Integer estoqueMinimo = produtoCreateDTO.getEstoqueMinimo() != null ? 
+	            produtoCreateDTO.getEstoqueMinimo() : 5;
+	            
 	        Estoque estoque = new Estoque();
 	        estoque.setProduto(produto);
-	        estoque.setQuantidadeAtual(0);
-	        estoque.setValorTotal(BigDecimal.ZERO);
+	        estoque.setQuantidadeAtual(quantidadeInicial);
+	        estoque.setEstoqueMinimo(estoqueMinimo);
+	        
+	        BigDecimal valorTotal = BigDecimal.valueOf(produto.getPrecoUnitario())
+	            .multiply(BigDecimal.valueOf(quantidadeInicial));
+	        estoque.setValorTotal(valorTotal);
+	        
 	        estoqueRepository.save(estoque);
 
-	        return new ProdutoDTO(produto);
+	        // Retornar DTO com informações de estoque
+	        ProdutoDTO dto = new ProdutoDTO(produto);
+	        dto.setQuantidade(quantidadeInicial);
+	        dto.setEstoqueMinimo(estoqueMinimo);
+	        return dto;
 	    }
 
 	    @Transactional(readOnly = true)
 	    public List<ProdutoDTO> listarProdutos() {
-	        return produtoRepository.findAll()
+	        // Listar apenas produtos ativos
+	        return produtoRepository.findByAtivoTrue()
 	            .stream()
-	            .map(ProdutoDTO::new)
+	            .map(produto -> {
+	                ProdutoDTO dto = new ProdutoDTO(produto);
+	                // Buscar informações de estoque
+	                estoqueRepository.findByProdutoId(produto.getId()).ifPresent(estoque -> {
+	                    dto.setQuantidade(estoque.getQuantidadeAtual());
+	                    dto.setEstoqueMinimo(estoque.getEstoqueMinimo());
+	                });
+	                return dto;
+	            })
 	            .collect(Collectors.toList());
 	    }
 
@@ -61,42 +80,69 @@ public class ProdutoService {
 	        Produto produto = produtoRepository.findById(id)
 	            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-	        // Verificar se o código não está sendo usado por outro produto
-	        if (!produto.getCodigo().equals(produtoCreateDTO.getCodigo()) && 
-	            produtoRepository.existsByCodigo(produtoCreateDTO.getCodigo())) {
-	            throw new RuntimeException("Código do produto já existe");
+	        // Atualizar campos do produto
+	        if (produtoCreateDTO.getDescricao() != null) {
+	            produto.setDescricao(produtoCreateDTO.getDescricao());
+	        }
+	        if (produtoCreateDTO.getPrecoUnitario() != null) {
+	            produto.setPrecoUnitario(produtoCreateDTO.getPrecoUnitario());
+	        }
+	        if (produtoCreateDTO.getCategoria() != null) {
+	            produto.setCategoria(produtoCreateDTO.getCategoria());
+	        }
+	        if (produtoCreateDTO.getSetor() != null) {
+	            produto.setSetor(produtoCreateDTO.getSetor());
 	        }
 
-	        produto.setCodigo(produtoCreateDTO.getCodigo());
-	        produto.setDescricao(produtoCreateDTO.getDescricao());
-	        produto.setPrecoUnitario(produtoCreateDTO.getPrecoUnitario());
-	        produto.setUnidadeMedida(produtoCreateDTO.getUnidadeMedida());
-
 	        produto = produtoRepository.save(produto);
-	        return new ProdutoDTO(produto);
+	        
+	        // Atualizar estoque
+	        Estoque estoque = estoqueRepository.findByProdutoId(id)
+	            .orElseThrow(() -> new RuntimeException("Estoque não encontrado"));
+	        
+	        // Aceitar tanto quantidadeInicial quanto quantidade
+	        Integer novaQuantidade = produtoCreateDTO.getQuantidadeInicial();
+	        if (novaQuantidade != null) {
+	            estoque.setQuantidadeAtual(novaQuantidade);
+	            BigDecimal valorTotal = BigDecimal.valueOf(produto.getPrecoUnitario())
+	                .multiply(BigDecimal.valueOf(novaQuantidade));
+	            estoque.setValorTotal(valorTotal);
+	        }
+	        
+	        if (produtoCreateDTO.getEstoqueMinimo() != null) {
+	            estoque.setEstoqueMinimo(produtoCreateDTO.getEstoqueMinimo());
+	        }
+	        
+	        estoqueRepository.save(estoque);
+	        
+	        ProdutoDTO dto = new ProdutoDTO(produto);
+	        dto.setQuantidade(estoque.getQuantidadeAtual());
+	        dto.setEstoqueMinimo(estoque.getEstoqueMinimo());
+	        return dto;
 	    }
 
 	    public void removerProduto(Long id) {
-	        Produto produto = produtoRepository.findById(id)
+	        Produto produto = produtoRepository.findByIdAndAtivoTrue(id)
 	            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-	        // Verificar se há estoque
-	        Estoque estoque = estoqueRepository.findByProdutoId(id).orElse(null);
-	        if (estoque != null && estoque.getQuantidadeAtual() > 0) {
-	            throw new RuntimeException("Não é possível remover produto com estoque");
-	        }
-
-	        if (estoque != null) {
-	            estoqueRepository.delete(estoque);
-	        }
+	        // Exclusão lógica - marcar como inativo
+	        produto.setAtivo(false);
+	        produtoRepository.save(produto);
 	        
-	        produtoRepository.delete(produto);
+	        System.out.println("✓ Produto ID " + id + " marcado como inativo (exclusão lógica)");
 	    }
 
 	    @Transactional(readOnly = true)
 	    public ProdutoDTO buscarPorId(Long id) {
-	        Produto produto = produtoRepository.findById(id)
+	        // Buscar apenas produtos ativos
+	        Produto produto = produtoRepository.findByIdAndAtivoTrue(id)
 	            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-	        return new ProdutoDTO(produto);
+	        ProdutoDTO dto = new ProdutoDTO(produto);
+	        // Buscar informações de estoque
+	        estoqueRepository.findByProdutoId(id).ifPresent(estoque -> {
+	            dto.setQuantidade(estoque.getQuantidadeAtual());
+	            dto.setEstoqueMinimo(estoque.getEstoqueMinimo());
+	        });
+	        return dto;
 	    }
 	}

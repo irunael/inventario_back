@@ -30,15 +30,20 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<ProdutoDTO> criarProduto(@RequestBody ProdutoCreateDTO produtoCreateDTO) {
-        ProdutoDTO produtoDTO = produtoService.criarProduto(produtoCreateDTO);
-        
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(produtoDTO.getId())
-                .toUri();
-        
-        return ResponseEntity.created(location).body(produtoDTO);
+    public ResponseEntity<?> criarProduto(@RequestBody ProdutoCreateDTO produtoCreateDTO) {
+        try {
+            ProdutoDTO produtoDTO = produtoService.criarProduto(produtoCreateDTO);
+            
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(produtoDTO.getId())
+                    .toUri();
+            
+            return ResponseEntity.created(location).body(produtoDTO);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log do erro no console
+            return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping
@@ -47,17 +52,45 @@ public class ProdutoController {
         return ResponseEntity.ok(produtos);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProdutoDTO> atualizarProduto(
-            @PathVariable Long id,
-            @RequestBody ProdutoCreateDTO produtoCreateDTO) {
-        ProdutoDTO produtoDTO = produtoService.atualizarProduto(id, produtoCreateDTO);
+    @GetMapping("/{id}")
+    public ResponseEntity<ProdutoDTO> buscarProduto(@PathVariable Long id) {
+        ProdutoDTO produtoDTO = produtoService.buscarPorId(id);
         return ResponseEntity.ok(produtoDTO);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizarProduto(
+            @PathVariable Long id,
+            @RequestBody ProdutoCreateDTO produtoCreateDTO) {
+        try {
+            ProdutoDTO produtoDTO = produtoService.atualizarProduto(id, produtoCreateDTO);
+            return ResponseEntity.ok(produtoDTO);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("não encontrado")) {
+                return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+            }
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(java.util.Map.of("error", "Erro ao atualizar produto: " + e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerProduto(@PathVariable Long id) {
-        produtoService.removerProduto(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> removerProduto(@PathVariable Long id) {
+        try {
+            produtoService.removerProduto(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("não encontrado")) {
+                return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+            }
+            e.printStackTrace();
+            return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(java.util.Map.of("error", "Erro ao remover produto: " + e.getMessage()));
+        }
     }
 }

@@ -1,10 +1,15 @@
 package com.cafe.Real.controller;
 
+import java.net.URI;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.cafe.Real.dto.LoginRequestDTO;
 import com.cafe.Real.dto.LoginResponseDTO;
@@ -29,13 +34,23 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDTO> register(@RequestBody UsuarioCreateDTO usuarioCreateDTO) {
-        UsuarioDTO usuarioDTO = usuarioService.criarUsuario(usuarioCreateDTO);
-        
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(usuarioDTO.getId())
-                .toUri();
-        
-        return ResponseEntity.created(location).body(usuarioDTO);
+    public ResponseEntity<?> register(@RequestBody UsuarioCreateDTO usuarioCreateDTO) {
+        try {
+            UsuarioDTO usuarioDTO = usuarioService.criarUsuario(usuarioCreateDTO);
+            
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(usuarioDTO.getId())
+                    .toUri();
+            
+            return ResponseEntity.created(location).body(usuarioDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
     
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
+        return ResponseEntity.ok(usuarioService.listarUsuarios());
+    }
+}

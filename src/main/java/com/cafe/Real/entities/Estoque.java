@@ -26,6 +26,9 @@ public class Estoque {
 	    @Column(name = "quantidade_atual", nullable = false)
 	    private Integer quantidadeAtual;
 	    
+	    @Column(name = "estoque_minimo", nullable = false)
+	    private Integer estoqueMinimo;
+	    
 	    @Column(name = "valor_total", nullable = false)
 	    private BigDecimal valorTotal;
 	    
@@ -60,5 +63,13 @@ public class Estoque {
 
 	    public void setValorTotal(BigDecimal valorTotal) {
 	        this.valorTotal = valorTotal;
+	    }
+
+	    public Integer getEstoqueMinimo() {
+	        return estoqueMinimo;
+	    }
+
+	    public void setEstoqueMinimo(Integer estoqueMinimo) {
+	        this.estoqueMinimo = estoqueMinimo;
 	    }
 }
